@@ -1,0 +1,27 @@
+1. app.use(checkUser)			// For all EndPoints
+2. app.use('/', checkUser)		// For Endpoints starting with '/'
+3. app.use('/user', checkUser)	// For Endpoints starting with '/user' not for all
+
+4. Application-Level Middleware ?   
+    Application-level middleware is bound to the whole application means generally runs throughout the whole application.
+    In the case of express.js, this kind of middleware are bound to the application by using app.use().
+    This means a middleware will be executed for all endpoints set in the application, unless we specify a specific path
+
+    // use application-level middleware for all API endpoints
+    app.use(applicationLevelMiddleware());
+
+    // use application-level middleware for all API endpoints with the path of http://localhost:${port}/api/*
+    app.use('/api/', applicationLevelMiddleware());
+
+
+    We can use application-level middleware in express by using app.METHOD() or a request method (GET, POST, PUT, DELETE).
+    The endpoint with a specific request METHOD at a given route will need to go through a middleware first.
+
+    // use application-level middleware for http://localhost:${port}/api/  `GET` API endpoint
+    app.get('/api/', applicationLevelMiddleware, (req,res)=> { } );
+
+5. Router-Level Middleware ?
+    Router-level middleware is bound to an instance of a router or Express.router(). This means the middleware will be applied to only the API endpoints defined in a specific instance of Express.Router().
+
+    This kind of middleware are bound to the Routes by using router.use().
+    e.g.    router.use(routerLevelMiddleware); 
