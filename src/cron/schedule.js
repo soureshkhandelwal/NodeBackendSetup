@@ -18,7 +18,6 @@ const cronPatterns = {
     "early-morning-05:30AM": "0 30 5 * * *",
     "every-three-hour": "0 */3 * * *",
     "every-eight-hour": "0 */8 * * *"
-
 };
 
 function cronJob(){

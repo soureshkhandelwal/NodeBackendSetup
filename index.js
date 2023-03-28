@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const { uuid } = require('uuidv4');
 const PORT = 3010;
 
 const dbConfig = require("./src/config/db");
@@ -304,6 +305,111 @@ app.get('/test', async(req,res)=>{
     console.log(b.hasOwnProperty(2))
 
     res.send('done')
+})
+
+app.get('/temp-table', (req,res)=>{
+    values= ['BR4001','BR4002','BR4003','BR4004','BR4005','BR4006','BR4007','BR4008','BR4009'];
+
+    let q1= `CREATE temporary table temp_branch ( code varchar(50) ); `
+    let q2= `INSERT INTO temp_branch(code) VALUES('BR4001'), ('BR4002'), ('BR4003'), ('BR4004'), ('BR4074'); `;
+    let q3= 'select t.code, sbm.branch_code from temp_branch t left join syn_branch_master sbm on sbm.branch_code=t.code ;'
+
+    // let joinedQuery= `${q1} ${q2} ${q3}`;
+    req.db.query(q1, (err,result)=>{
+        if(err) return res.status(500).send(err);
+        
+        req.db.query(q2, (err,result)=>{
+            if(err) return res.status(500).send(err);
+
+            req.db.query(q3, (err,result)=>{
+                if(err) return res.status(500).send(err);
+    
+                console.log(q3)
+                req.db.end()
+                return res.status(200).send(result)
+            })
+        })
+    })
+})
+
+app.get('/without-trans', (req,res)=>{
+    let guid= uuid();
+    console.log(guid);
+
+    let q1= 'INSERT INTO leads (id,first_name) VALUES (?,?)';
+    let q2= 'INSERT INTO leads_cstm (id_c,lead_no_) VALUES (?,?)';
+
+    // It will Save for Leads table Even Error while inserting Lead-Cstm
+    req.db.query(q1, [guid, 'Rollback-1111'], (err,result)=>{
+        if(err) return res.status(500).send(err);
+        console.log(result);
+        req.db.query(q2, [guid, 546547], (err,result)=>{
+            if(err) return res.status(500).send(err);
+            console.log(result);
+            req.db.end()
+            return res.status(200).send(result)
+        })
+    })
+})
+
+app.get('/transaction', async(req,res)=>{
+    const addStudent = (studentId, name, address, city) => {
+        return new Promise((resolve, reject) => {
+            let connection = req.db;
+            return connection.beginTransaction(err => {
+                if (err) {
+                    connection.end();
+                    return reject("Error occurred while creating the transaction");
+                }
+                let guid= uuid();
+                console.log(guid)
+                return connection.query(
+                    'INSERT INTO leads (id,first_name) VALUES (?,?)', [guid, 'Rollback'], (err) => {
+                        if (err) {
+                            return connection.rollback(() => {
+                                connection.end();
+                                console.log("Inserting to Leads table failed", err.toString())
+                                return reject({msg:"Inserting to Leads table failed", err: err.toString()})
+                            });
+                        }
+                        console.log("Success Inserted Into Leads")
+                        return connection.query(
+                            'INSERT INTO leads_cstm (id_c,lead_no_c) VALUES (?,?)', [guid, 546546], (err) => {
+                                if (err) {
+                                    return connection.rollback(() => {
+                                        connection.end();
+                                        console.log("Inserting to Leads-Cstm table failed", err.toString())
+                                        return reject({msg:"Inserting to Lead-Cstm table failed", err: err.toString()});
+                                    });
+                                }
+                                console.log("Success Inserted Into Leads-CSTM")
+                                return connection.commit((err, result) => {
+                                    if (err) {
+                                        return connection.rollback(() => {
+                                            connection.end();
+                                            console.log("Commit Failed", err.toString())
+                                            return reject({msg:"Commit failed", err: err.toString()});
+                                        });
+                                    }
+                                    console.log(result)
+                                    connection.end();
+                                    return resolve('Success All Queries')
+                                });
+                            })
+
+                    });
+
+            });
+        });
+    } 
+    
+    await addStudent(100, 'John Doyle', '221B Baker Street', 'London')
+    .then(data=>{
+        res.send(data)
+    })
+    .catch(err => {
+        res.send(err)
+    });
 })
 
 app.get('*', (req,res,next) =>{
