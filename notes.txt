@@ -1,0 +1,20 @@
+            // ------------------ Fetch Multi-data at Once ------------------------
+
+//1. using `aggregate()` & `$match()`
+connObj.db.collection('digital_form_prod')
+        .aggregate([
+            {
+                $match: {
+                    "leadId": { $in: dataArr }
+                }
+            },
+            { $project: { "leadDetails": 1 } }
+        ])
+
+//2. using `$in`
+connObj.dbConn.collection('digital_form_prod')
+        .find({ 
+            _id: {
+                "$in": [ObjectId("609257a002559a2294dfb0c3"), ObjectId("6094c6fdce9ed226e40604a8")]
+            }
+        })

@@ -6,6 +6,7 @@ const PORT = 3010;
 const dbConfig = require("./src/config/db");
 const helpers = require('./src/common/helper');
 const authUser= require('./src/routes/authUser')
+const test= require('./src/routes/testQ')
 const dailyCron= require('./src/cron/schedule')
 dailyCron.cronJob()
 
@@ -48,6 +49,7 @@ app.use(checkClient);
 
 // Router
 app.use('/jwt', authUser)
+app.use('/testing', test)
 // Router
 
 // Cookies
@@ -224,12 +226,6 @@ app.get('/fetch-users', (req,res, next)=>{
         ])
 */
 
-// connObj.dbConn.collection('digital_form_prod')
-//         .find({ 
-//             _id: {
-//                 "$in": [ObjectId("609257a002559a2294dfb0c3"), ObjectId("6094c6fdce9ed226e40604a8")]
-//             }
-//         })
  
 const ObjectId = require('mongodb').ObjectId;
 
