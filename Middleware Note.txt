@@ -10,7 +10,7 @@
     // use application-level middleware for all API endpoints
     app.use(applicationLevelMiddleware());
 
-    // use application-level middleware for all API endpoints with the path of http://localhost:${port}/api/*
+    // use application-level middleware for only APIs endpoints with the path of http://localhost:${port}/api/*
     app.use('/api/', applicationLevelMiddleware());
 
 
