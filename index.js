@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const { uuid } = require('uuidv4');
+const path = require('path');
 const PORT = 3010;
 
 const dbConfig = require("./src/config/db");
@@ -215,17 +216,6 @@ app.get('/fetch-users', (req,res, next)=>{
     })
     .catch(err => console.log("ERROR!!! While fetching User-Details: ", err) )
 })
-
-/*
-.aggregate([
-            {
-                $match: {
-                    "name": { $in: ["Mithlesh Devi", "Himalaya"] }
-                }
-            }
-        ])
-*/
-
  
 const ObjectId = require('mongodb').ObjectId;
 

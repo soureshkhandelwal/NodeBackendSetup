@@ -1,4 +1,6 @@
 const fs = require('fs')
+const puppeteer = require('puppeteer')
+const path = require('path');
 const { parse }= require('csv-parse')
 const mongodbConnection= require('../../config/mongo').mongoConn
 require('dotenv').config();
@@ -87,4 +89,80 @@ exports.insertCsv=(req,res)=>{
         "Content-Disposition": `attachment; filename="users.csv"`,
     })
     .send(csvData)
+}
+
+module.exports.checkAnagram = (a, b)=> {
+    return new Promise(async resolve => {
+        // if (a.length == b.length) {
+            let x = a.split('').sort()
+            let y = b.split('').sort()
+            console.log(x)
+            console.log(y)
+            if (x.join('') == y.join('')) {
+                return resolve("Equal && Anagram");
+            } else {
+                // Find Out Steps to make them Anagram
+                let aobj = await countChars(a)
+                let bobj = await countChars(b)
+                console.log(aobj)
+                console.log(bobj)
+
+                let count = 0;
+                for (let char in aobj) {
+                    if ((char in bobj) == false) {
+                        count += aobj[char]
+                    } else {
+                        // console.log(aobj[char] + ' - ', bobj[char] + ' : ' + Math.abs(aobj[char] - bobj[char]))
+                        count += Math.abs(aobj[char] - bobj[char])
+                    }
+                }
+                for (let char in bobj) {
+                    if ((char in aobj) == false) {
+                        count += bobj[char]
+                    }
+                }
+                console.log("Total Required Setps:", count)
+                return resolve(`Not Anagram: ${count} Steps`)
+            }
+        // }
+    })
+}
+
+function countChars(str) {
+    let charCount = {};
+    for (let i = 0; i < str.length; i++) {
+        let char = str.charAt(i);
+        charCount[char] = (charCount[char] || 0) + 1;
+    }
+    return charCount;
+}
+
+exports.generatePDF= async(req,res)=>{
+    var students = [
+        {
+            id: 1,
+            name: "Sam",
+            age: 21
+        },
+        {
+            id: 2,
+            name: "Jhon",
+            age: 20
+        },
+        {
+            id: 3,
+            name: "Jim",
+            age: 24
+        }
+    ]
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    console.log(req.protocol, req.get('host'))
+    await page.goto('localhost:3010/testing/generate-pdf');
+    await page.setViewport({width: 1080, height: 1024});    // Set screen size
+
+    await browser.close();
+    res.render("report", { name: 'Monroe' } )
 }
