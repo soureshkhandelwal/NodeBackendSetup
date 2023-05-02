@@ -1,7 +1,8 @@
 const express = require('express');
 const app = express();
 const { uuid } = require('uuidv4');
-const PORT = 3010;
+require('dotenv').config().
+const PORT = process.env.PORT || 3010;
 
 const dbConfig = require("./src/config/db");
 const helpers = require('./src/common/helper');
